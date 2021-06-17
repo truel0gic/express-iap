@@ -3,24 +3,24 @@ const { OAuth2Client } = require('google-auth-library');
 
 const client = new OAuth2Client();
 
-let aud;
+let cachedAud;
 
 const audience = async () => {
   const metadataAvailable = await metadata.isAvailable();
 
-  if (!aud && metadataAvailable) {
+  if (!cachedAud && metadataAvailable) {
     const [projectNumber, projectId] = await Promise.all([
       metadata.project('numberic-project-id'),
       metadata.project('project-id'),
     ]);
 
-    aud = `/projects/${projectNumber}/apps/${projectId}`;
+    cachedAud = `/projects/${projectNumber}/apps/${projectId}`;
   }
 
-  return aud;
+  return cachedAud;
 };
 
-const verify = (req, res, next) => {
+const verify = async (req, res, next) => {
   const assertion = req.get('X-Goog-IAP-JWT-Assertion');
 
   try {
